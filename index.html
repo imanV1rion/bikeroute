@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Trip Weather System: multi-vehicle route weather forecasting, headwind/crosswind calculation, road ice proxy, and comfort scoring engine." />
+    <title>Trip Weather System — Route Weather & Comfort Scoring</title>
+    
+    <!-- Google Fonts: Luxury Tech Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Header -->
+      <header class="header-bar">
+        <div class="brand-section">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title">Trip Weather System</div>
+            <div class="brand-subtitle">Multi-Vehicle Comfort & Hazard Engine</div>
+          </div>
+        </div>
+
+        <div class="header-status-area">
+          <div class="cache-pill" id="cache-stats-pill" title="0.1° grid cell & 1-hour cache layer">
+            <span class="indicator"></span>
+            <span id="cache-stats-label">Cache: 0 hits (0%)</span>
+          </div>
+
+          <button id="btn-open-tuning" class="quick-btn" title="Tune or add custom vehicle profiles">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span class="btn-text">Vehicle Profiles</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Body -->
+      <div class="app-body">
+        <!-- Sidebar Controls & Analysis -->
+        <aside class="sidebar">
+          <!-- Trip Setup -->
+          <div class="sidebar-section">
+            <div class="section-label">
+              <span>Live Trip Configuration</span>
+              <span style="font-size: 10px; color: var(--accent-cyan); text-transform: none;">India Live Routing</span>
+            </div>
+
+            <div class="route-inputs">
+              <div class="autocomplete-wrapper">
+                <div class="input-group">
+                  <span class="input-icon">🟢</span>
+                  <input type="text" id="input-start" class="text-input" placeholder="Start city / landmark (e.g. Mumbai, Delhi, Manali)" autocomplete="off" />
+                  <button type="button" id="btn-use-live-location" class="location-detect-btn" title="Use current live GPS location" aria-label="Use current location">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="22" y1="12" x2="18" y2="12"/>
+                      <line x1="6" y1="12" x2="2" y2="12"/>
+                      <line x1="12" y1="6" x2="12" y2="2"/>
+                      <line x1="12" y1="22" x2="12" y2="18"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span class="btn-live-text">Live GPS</span>
+                  </button>
+                  <span id="loader-start" class="input-spinner" style="display: none;"></span>
+                </div>
+                <div id="suggestions-start" class="suggestions-dropdown" style="display: none;"></div>
+              </div>
+
+              <div class="autocomplete-wrapper">
+                <div class="input-group">
+                  <span class="input-icon">🏁</span>
+                  <input type="text" id="input-end" class="text-input" placeholder="Destination (e.g. Pune, Agra, Leh, Goa)" autocomplete="off" />
+                  <span id="loader-end" class="input-spinner" style="display: none;"></span>
+                </div>
+                <div id="suggestions-end" class="suggestions-dropdown" style="display: none;"></div>
+              </div>
+            </div>
+
+            <!-- Vehicle Selection -->
+            <div class="section-label" style="margin-top: 14px;">
+              <span>Vehicle Profile</span>
+              <span id="vehicle-desc-label" style="font-size: 10px; color: var(--text-dim); text-transform: none;"></span>
+            </div>
+            <div class="vehicle-grid" id="vehicle-selector-grid"></div>
+
+            <div class="row-options" style="margin-top: 10px;">
+              <div class="input-group" style="padding: 4px 8px; flex: 1; margin-right: 8px;">
+                <span class="input-icon">🕒</span>
+                <input type="datetime-local" id="input-departure" class="text-input" style="font-size: 11px;" />
+              </div>
+
+              <label class="checkbox-label" title="Score two routes and recommend the route with best weather">
+                <input type="checkbox" id="check-alternatives" checked />
+                <span>Alt Route</span>
+              </label>
+            </div>
+
+            <div class="row-options" style="margin-top: 8px;">
+              <div class="input-group" style="padding: 4px 8px; flex: 1;">
+                <span class="input-icon">🏎️</span>
+                <input type="number" id="input-custom-speed" class="text-input" placeholder="Average speed (km/h) (optional)" min="1" max="250" style="font-size: 11px;" />
+              </div>
+            </div>
+
+            <button id="btn-calculate" class="primary-btn">
+              <span>⚡ Analyze Route Weather</span>
+            </button>
+            <div id="inline-error-banner" style="display: none; padding: 10px 12px; border-radius: var(--radius-sm); font-size: 12px; margin-top: 10px; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.15); color: #fca5a5; line-height: 1.4;"></div>
+          </div>
+
+          <!-- Trip Verdict & Scores -->
+          <div class="sidebar-section" id="section-verdict" style="display: none;">
+            <div class="section-label">
+              <span>Comfort Verdict & Score</span>
+              <span id="score-duration-label" style="font-size: 11px; color: var(--accent-cyan); font-family: var(--font-mono);"></span>
+            </div>
+
+            <div id="verdict-container"></div>
+
+            <!-- EV & Second Pass Alerts -->
+            <div id="second-pass-container"></div>
+
+            <!-- Best Departure Recommendation Callout -->
+            <div id="departure-callout" style="margin-top: 10px;"></div>
+          </div>
+
+
+          <!-- Route Hazard Feed -->
+          <div class="sidebar-section" id="section-hazards" style="display: none;">
+            <div class="section-label">
+              <span>Hazard Warnings</span>
+              <span id="warnings-count-badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 1px 6px; border-radius: 8px; font-size: 10px;">0</span>
+            </div>
+            <div id="warnings-container" class="warning-feed"></div>
+          </div>
+        </aside>
+
+        <!-- Main Map & Visualization Stage -->
+        <main class="main-stage">
+          <div id="map-container"></div>
+
+          <!-- Bottom Drawer Tabs -->
+          <div class="bottom-panel">
+            <div class="bottom-tabs">
+              <button class="panel-tab active" data-tab="tab-profile">Topography & Weather Profile</button>
+              <button class="panel-tab" data-tab="tab-departure">10-Hour Departure Optimizer</button>
+              <button class="panel-tab" data-tab="tab-points">Sample Points Table (<span id="points-count-tab">0</span>)</button>
+            </div>
+
+            <div class="panel-content">
+              <!-- Route Profile Tab -->
+              <div id="tab-profile" class="tab-pane active">
+                <div id="chart-route-profile"></div>
+              </div>
+
+              <!-- Departure Optimizer Tab -->
+              <div id="tab-departure" class="tab-pane" style="display: none;">
+                <div id="chart-departure-matrix"></div>
+              </div>
+
+              <!-- Sample Points Tab -->
+              <div id="tab-points" class="tab-pane" style="display: none; max-height: 180px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                  <thead>
+                    <tr style="color: var(--text-dim); border-bottom: 1px solid var(--border-glass); text-align: left;">
+                      <th style="padding: 6px;">Location</th>
+                      <th style="padding: 6px;">Dist</th>
+                      <th style="padding: 6px;">ETA</th>
+                      <th style="padding: 6px;">Temp</th>
+                      <th style="padding: 6px;">Rain</th>
+                      <th style="padding: 6px;">Headwind</th>
+                      <th style="padding: 6px;">Crosswind</th>
+                      <th style="padding: 6px;">Score</th>
+                    </tr>
+                  </thead>
+                  <tbody id="points-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading Overlay -->
+          <div id="loading-overlay" class="loading-indicator">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loading-message">Fetching route & querying Open-Meteo...</div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Vehicle Profile Tuning Modal -->
+      <div id="modal-tuning" class="modal-overlay">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">⚙️ Vehicle Profiles & Hazard Weights</div>
+            <button class="modal-close-btn" id="btn-close-tuning">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">
+              Tune hazard weights and threshold boundaries dynamically. The system updates comfort scores without code changes.
+            </p>
+            <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+              <select id="modal-profile-select" class="input-select" style="flex: 1;"></select>
+              <button id="btn-reset-profiles" class="secondary-btn" title="Reset all profiles to defaults">Reset Defaults</button>
+            </div>
+            <div id="modal-profile-hazards-editor"></div>
+          </div>
+          <div class="modal-footer">
+            <button id="btn-save-profile-changes" class="primary-btn" style="width: auto; padding: 8px 16px;">
+              Save & Apply Profile
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Mobile Navigation Bar (<1024px) -->
+      <nav class="mobile-nav-bar" id="mobile-nav-bar" aria-label="Mobile Navigation">
+        <button class="mobile-nav-btn active" data-view="setup" id="mobile-btn-setup">
+          <span class="m-icon">⚡</span>
+          <span class="m-label">Trip Setup</span>
+        </button>
+        <button class="mobile-nav-btn" data-view="map" id="mobile-btn-map">
+          <span class="m-icon">🗺️</span>
+          <span class="m-label">Route Map</span>
+        </button>
+        <button class="mobile-nav-btn" data-view="analysis" id="mobile-btn-analysis">
+          <span class="m-icon">📊</span>
+          <span class="m-label">Analysis</span>
+        </button>
+      </nav>
+
+    </div>
+
+    <!-- Application Script -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <!-- Organic Noise Pattern -->
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.07 0" />
+    </filter>
+
+    <!-- Linear gradients for contour depth -->
+    <linearGradient id="contourGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.09" />
+      <stop offset="50%" stop-color="#38a3d4" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02" />
+    </linearGradient>
+
+    <linearGradient id="contourGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#94a3b8" stop-opacity="0.07" />
+      <stop offset="100%" stop-color="#64748b" stop-opacity="0.02" />
+    </linearGradient>
+  </defs>
+
+  <!-- Base Texture Noise Layer -->
+  <rect width="100%" height="100%" fill="none" filter="url(#noiseFilter)" />
+
+  <!-- Elegant Topographical Contour Lines (Smooth Vector Curves) -->
+  <g fill="none" stroke="url(#contourGrad1)" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="800" stroke-dashoffset="0">
+    <!-- Contour Set 1 - Elevation Wave -->
+    <path d="M-50,80 Q70,30 180,95 T390,70 T650,110" />
+    <path d="M-50,140 Q80,90 200,155 T410,130 T650,170" opacity="0.8" />
+    <path d="M-50,200 Q90,150 220,215 T430,190 T650,230" opacity="0.6" />
+    <path d="M-50,260 Q100,210 240,275 T450,250 T650,290" opacity="0.85" />
+    <path d="M-50,320 Q110,270 260,335 T470,310 T650,350" opacity="0.7" />
+    <path d="M-50,380 Q120,330 280,395 T490,370 T650,410" opacity="0.9" />
+    <path d="M-50,440 Q130,390 300,455 T510,430 T650,470" opacity="0.75" />
+    <path d="M-50,500 Q140,450 320,515 T530,490 T650,530" opacity="0.6" />
+    <path d="M-50,560 Q150,510 340,575 T550,550 T650,590" opacity="0.8" />
+  </g>
+
+  <!-- Cross Terrain Contour Group -->
+  <g fill="none" stroke="url(#contourGrad2)" stroke-width="1" stroke-linecap="round">
+    <!-- Mountain Ridges & Valleys -->
+    <path d="M30,-20 C120,80 80,240 190,320 S350,420 310,620" opacity="0.7" />
+    <path d="M90,-20 C180,80 140,240 250,320 S410,420 370,620" opacity="0.5" />
+    <path d="M150,-20 C240,80 200,240 310,320 S470,420 430,620" opacity="0.75" />
+    <path d="M210,-20 C300,80 260,240 370,320 S530,420 490,620" opacity="0.6" />
+    <path d="M270,-20 C360,80 320,240 430,320 S590,420 550,620" opacity="0.8" />
+
+    <!-- Organic Iso-Elevation Rings (Elevation Peaks) -->
+    <ellipse cx="440" cy="180" rx="90" ry="50" transform="rotate(-20 440 180)" stroke-width="0.8" opacity="0.5" />
+    <ellipse cx="440" cy="180" rx="65" ry="35" transform="rotate(-20 440 180)" stroke-width="1" opacity="0.65" />
+    <ellipse cx="440" cy="180" rx="40" ry="20" transform="rotate(-20 440 180)" stroke-width="1.2" opacity="0.8" stroke="#38a3d4" stroke-opacity="0.12" />
+    <circle cx="440" cy="180" r="1.5" fill="#38a3d4" fill-opacity="0.25" />
+
+    <ellipse cx="140" cy="460" rx="80" ry="45" transform="rotate(25 140 460)" stroke-width="0.8" opacity="0.5" />
+    <ellipse cx="140" cy="460" rx="55" ry="30" transform="rotate(25 140 460)" stroke-width="1" opacity="0.65" />
+    <ellipse cx="140" cy="460" rx="30" ry="16" transform="rotate(25 140 460)" stroke-width="1.1" opacity="0.75" />
+  </g>
+
+  <!-- Fine Micro Grid Dots (Coordinates Texture) -->
+  <g fill="#94a3b8" fill-opacity="0.08">
+    <circle cx="60" cy="60" r="1" />
+    <circle cx="180" cy="60" r="1" />
+    <circle cx="300" cy="60" r="1" />
+    <circle cx="420" cy="60" r="1" />
+    <circle cx="540" cy="60" r="1" />
+
+    <circle cx="60" cy="180" r="1" />
+    <circle cx="180" cy="180" r="1" />
+    <circle cx="300" cy="180" r="1" />
+    <circle cx="420" cy="180" r="1" />
+    <circle cx="540" cy="180" r="1" />
+
+    <circle cx="60" cy="300" r="1" />
+    <circle cx="180" cy="300" r="1" />
+    <circle cx="300" cy="300" r="1" />
+    <circle cx="420" cy="300" r="1" />
+    <circle cx="540" cy="300" r="1" />
+
+    <circle cx="60" cy="420" r="1" />
+    <circle cx="180" cy="420" r="1" />
+    <circle cx="300" cy="420" r="1" />
+    <circle cx="420" cy="420" r="1" />
+    <circle cx="540" cy="420" r="1" />
+
+    <circle cx="60" cy="540" r="1" />
+    <circle cx="180" cy="540" r="1" />
+    <circle cx="300" cy="540" r="1" />
+    <circle cx="420" cy="540" r="1" />
+    <circle cx="540" cy="540" r="1" />
+  </g>
+</svg>
